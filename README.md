@@ -1,111 +1,172 @@
-# Next.js SaaS Starter
+# John's Plant Pots - Ecommerce Shop
 
-This is a starter template for building a SaaS application using **Next.js** with support for authentication, Stripe integration for payments, and a dashboard for logged-in users.
+A streamlined ecommerce application for selling premium plant pots, built with Next.js, PostgreSQL, and Stripe payments.
 
-**Demo: [https://next-saas-start.vercel.app/](https://next-saas-start.vercel.app/)**
+![John's Plant Pots](https://via.placeholder.com/800x400.png?text=John's+Plant+Pots)
 
 ## Features
 
-- Marketing landing page (`/`) with animated Terminal element
-- Pricing page (`/pricing`) which connects to Stripe Checkout
-- Dashboard pages with CRUD operations on users/teams
-- Basic RBAC with Owner and Member roles
-- Subscription management with Stripe Customer Portal
-- Email/password authentication with JWTs stored to cookies
-- Global middleware to protect logged-in routes
-- Local middleware to protect Server Actions or validate Zod schemas
-- Activity logging system for any user events
+### 🔐 User Authentication
+- Email/password signup and login
+- Session-based authentication
+- Protected checkout routes
+
+### 🪴 Product Catalog
+- Featured premium plant pots
+- Product cards with images and descriptions
+- Simple, intuitive product browsing
+
+### 🛒 Shopping Cart
+- Add items to cart with quantity selection
+- Update or remove items
+- Works for both logged-in and guest users (localStorage fallback)
+- Persistent cart between sessions for logged-in users
+
+### 💳 Checkout Process
+- Seamless Stripe payment integration
+- Order confirmation
+- Order history for logged-in users
 
 ## Tech Stack
 
-- **Framework**: [Next.js](https://nextjs.org/)
-- **Database**: [Postgres](https://www.postgresql.org/)
-- **ORM**: [Drizzle](https://orm.drizzle.team/)
+- **Framework**: [Next.js](https://nextjs.org/) (App Router)
+- **Database**: PostgreSQL with [Drizzle ORM](https://orm.drizzle.team/)
 - **Payments**: [Stripe](https://stripe.com/)
-- **UI Library**: [shadcn/ui](https://ui.shadcn.com/)
+- **UI**: Custom components with [Tailwind CSS](https://tailwindcss.com/)
+- **Authentication**: Custom JWT-based auth with [jose](https://github.com/panva/jose)
 
 ## Getting Started
 
+### Prerequisites
+
+- Node.js 18+ and npm/pnpm
+- PostgreSQL database
+- Stripe account
+
+### Installation
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/johns-plant-pots.git
+   cd johns-plant-pots
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
+
+3. Set up your environment variables by copying the example file:
+   ```bash
+   cp .env.example .env
+   ```
+   
+4. Fill in the required environment variables in `.env`:
+   ```
+   POSTGRES_URL=postgresql://username:password@localhost:5432/db_name
+   STRIPE_SECRET_KEY=sk_test_...
+   STRIPE_WEBHOOK_SECRET=whsec_...
+   BASE_URL=http://localhost:3000
+   AUTH_SECRET=random_string_here
+   ```
+
+### Development
+
+Use the included setup script to create your `.env` file if you haven't done so manually:
+
 ```bash
-git clone https://github.com/nextjs/saas-starter
-cd saas-starter
-pnpm install
-```
-
-## Running Locally
-
-Use the included setup script to create your `.env` file:
-
-```bash
+npm run db:setup
+# or
 pnpm db:setup
 ```
 
-Then, run the database migrations and seed the database with a default user and team:
+Then, run the database migrations and seed the database with default products:
 
 ```bash
+npm run db:migrate
+npm run db:seed
+# or
 pnpm db:migrate
 pnpm db:seed
 ```
 
-This will create the following user and team:
+This will create a test user with:
+- Email: `test@example.com`
+- Password: `password123`
 
-- User: `test@test.com`
-- Password: `admin123`
-
-You can, of course, create new users as well through `/sign-up`.
-
-Finally, run the Next.js development server:
+Start the development server:
 
 ```bash
+npm run dev
+# or
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the app in action.
+Visit [http://localhost:3000](http://localhost:3000) to see the application.
 
-Optionally, you can listen for Stripe webhooks locally through their CLI to handle subscription change events:
+### Testing Payments
 
-```bash
-stripe listen --forward-to localhost:3000/api/stripe/webhook
-```
-
-## Testing Payments
-
-To test Stripe payments, use the following test card details:
+To test Stripe payments, use these test card details:
 
 - Card Number: `4242 4242 4242 4242`
 - Expiration: Any future date
 - CVC: Any 3-digit number
 
-## Going to Production
+Optionally, you can listen for Stripe webhooks locally through their CLI to handle payment events:
 
-When you're ready to deploy your SaaS application to production, follow these steps:
+```bash
+stripe listen --forward-to localhost:3000/api/stripe/webhook
+```
 
-### Set up a production Stripe webhook
+## Deployment
 
-1. Go to the Stripe Dashboard and create a new webhook for your production environment.
-2. Set the endpoint URL to your production API route (e.g., `https://yourdomain.com/api/stripe/webhook`).
-3. Select the events you want to listen for (e.g., `checkout.session.completed`, `customer.subscription.updated`).
+### Production Setup
 
-### Deploy to Vercel
+When deploying to production, follow these steps:
 
-1. Push your code to a GitHub repository.
-2. Connect your repository to [Vercel](https://vercel.com/) and deploy it.
-3. Follow the Vercel deployment process, which will guide you through setting up your project.
+1. Set up a production Stripe webhook
+   - Go to the Stripe Dashboard and create a new webhook for your production environment
+   - Set the endpoint URL to your production API route (e.g., `https://yourdomain.com/api/stripe/webhook`)
+   - Select the events you want to listen for (e.g., `checkout.session.completed`)
 
-### Add environment variables
+2. Add environment variables to your hosting platform
+   - `BASE_URL`: Set this to your production domain
+   - `STRIPE_SECRET_KEY`: Use your Stripe secret key for the production environment
+   - `STRIPE_WEBHOOK_SECRET`: Use the webhook secret from the production webhook
+   - `POSTGRES_URL`: Set this to your production database URL
+   - `AUTH_SECRET`: Generate a random string using `openssl rand -base64 32`
 
-In your Vercel project settings (or during deployment), add all the necessary environment variables. Make sure to update the values for the production environment, including:
+3. Deploy your application
+   - If using Vercel, connect your repository and follow their deployment process
+   - Make sure to add all the necessary environment variables in your project settings
 
-1. `BASE_URL`: Set this to your production domain.
-2. `STRIPE_SECRET_KEY`: Use your Stripe secret key for the production environment.
-3. `STRIPE_WEBHOOK_SECRET`: Use the webhook secret from the production webhook you created in step 1.
-4. `POSTGRES_URL`: Set this to your production database URL.
-5. `AUTH_SECRET`: Set this to a random string. `openssl rand -base64 32` will generate one.
+## Project Structure
 
-## Other Templates
+```
+.
+├── app                     # Next.js App Router
+│   ├── (login)             # Auth-related pages
+│   ├── api                 # API routes
+│   ├── cart                # Shopping cart page
+│   ├── checkout            # Checkout and success pages
+│   └── page.tsx            # Home page
+├── components              # React components
+│   ├── ui                  # UI components
+│   ├── Footer.tsx
+│   ├── Header.tsx
+│   ├── LoginForm.tsx
+│   ├── ProductCard.tsx
+│   └── ShoppingCart.tsx
+├── lib                     # Utility functions
+│   ├── auth                # Authentication logic
+│   ├── db                  # Database setup and queries
+│   └── payments            # Payment processing
+└── public                  # Static assets
+    └── images              # Product images
+```
 
-While this template is intentionally minimal and to be used as a learning resource, there are other paid versions in the community which are more full-featured:
+## License
 
-- https://achromatic.dev
-- https://shipfa.st
-- https://makerkit.dev
+This project is licensed under the MIT License - see the LICENSE file for details.
